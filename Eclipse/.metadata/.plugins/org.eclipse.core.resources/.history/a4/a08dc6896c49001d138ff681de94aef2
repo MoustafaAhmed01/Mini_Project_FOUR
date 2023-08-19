@@ -1,0 +1,83 @@
+/******************************************************************************
+ *
+ * Module: Common - Platform Types Abstraction
+ *
+ * File Name: Main.c
+ *
+ * Description: Main file
+ *
+ * Date Created: 11/10/2022
+ *
+ * Author: Moustafa Ahmed
+ *
+ *******************************************************************************/
+
+#include "Libraries.h"
+#include "std_types.h"
+#include "GPIO.h"
+#include "LCD.h"
+#include "icu.h"
+#include "ultrasonic.h"
+
+/**-------------------------Extern Section------------------------**/
+extern uint8 g_edgeCount;
+/**-------------------------Function Def Section------------------**/
+void Intializer(void)
+{
+	/* Initializing LCD */
+	LCD_init();
+
+	/* Initializing Ultra-Sonic from it ICU will be Initialized*/
+	Ultrasonic_init();
+
+	/* Activating the I bit */
+	SREG |=(1<<7);
+}
+/**-------------------------Main Section--------------------------**/
+int main(void)
+{
+	uint16 Distance;
+	/* Initializing Everything */
+	Intializer();
+
+	/* Displaying the distance on LCD */
+	LCD_moveCursor(0, 0);
+	LCD_displayString("Distance=    cm");
+
+	while(1)
+	{
+		if(g_edgeCount == 2)
+		{
+
+		}
+		/* Reading the value from ultra-sonic driver*/
+		Distance = Ultrasonic_readDistance();
+
+		/* Displaying the value */
+		LCD_moveCursor(0, 10);
+
+		/* Fixing LCD Issue */
+		if(Distance < 10)
+		{
+			LCD_intgerToString(Distance);
+			LCD_displayString("  ");
+		}
+		else if(Distance <100)
+		{
+			LCD_intgerToString(Distance);
+			LCD_displayString(" ");
+		}
+		else
+		{
+			LCD_intgerToString(Distance);
+		}
+
+
+		/* Detecting the raising edge again Every time */
+		Icu_setEdgeDetectionType(RAISING_EDGE);
+
+	}
+
+	return 0;
+}
+/**-------------------------END------------------------------------**/
